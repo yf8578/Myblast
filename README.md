@@ -7,6 +7,7 @@
 BLAST（Basic Local Alignment Search Tool）是一套在蛋白质数据库或DNA数据库中进行相似性比较的分析工具。BLAST程序能迅速与公开数据库进行相似性序列比较。
 BLAST结果中的得分是对一种对相似性的统计说明。
 ![image](https://user-images.githubusercontent.com/71922803/190534573-6ba16a8e-24c1-44a9-8f4e-1e392a392135.png)
+<img src="https://user-images.githubusercontent.com/71922803/190534573-6ba16a8e-24c1-44a9-8f4e-1e392a392135.png" width="48">
 
 BLAST 采用一种局部的算法获得两个序列中具有相似性的序列。
 
