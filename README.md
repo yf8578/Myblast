@@ -13,4 +13,27 @@ BLAST 采用一种局部的算法获得两个序列中具有相似性的序列�
 
 `BLAST软件能够将一个目标蛋白或核苷酸序列(称为查询query)与一个数据库进行比较，并识别某个特定阈值以上的与目标序列相似的库序列。在线的BLAST功能只需要将序列输入，然后BLAST，最后会给出相似的库序列(按照同源性高低排列)。在线BLAST明显存在两个缺陷：1.目标序列BLAST后的得到的库序列是多个物种的，如果我们只是要特定物种的话，还需要再自己找。2.如果目标序列有很多，则需要执行很多次，效率低。而本地化的BLAST+能很好的解决上面两个问题。
 `
-## 
+## 下载安装
+下载地址：ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/
+## 建立数据库
+BLAST数据库分为两类，核酸数据库和氨基酸数据库，可以用`makeblastbd`创建。可以用help参数简单看下说明。
+```
+$ makeblastdb -help
+USAGE
+  makeblastdb [-h] [-help] [-in input_file] [-input_type type]
+    -dbtype molecule_type [-title database_title] [-parse_seqids]
+    [-hash_index] [-mask_data mask_data_files] [-mask_id mask_algo_ids]
+    [-mask_desc mask_algo_descriptions] [-gi_mask]
+    [-gi_mask_name gi_based_mask_names] [-out database_name]
+    [-max_file_sz number_of_bytes] [-logfile File_Name] [-taxid TaxID]
+    [-taxid_map TaxIDMapFile] [-version]
+-dbtype <String, `nucl', `prot'>
+```
+使用命令makeblasted，参考下面给出的命令和上面的帮助信息进行操作
+```
+cd /my/NCBI
+/share/app/blast/2.11.0/bin/makeblastdb -in GCF_000001405.40_GRCh38.p14_genomic.fa -parse_seqids -blastdb_version 5 -dbtype nucl
+```
+<div align=center>
+<img src="https://user-images.githubusercontent.com/71922803/190936389-70d43be0-f925-4699-92b2-62a6329051d1.png" width="450">
+</div>
