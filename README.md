@@ -15,8 +15,41 @@ BLAST 采用一种局部的算法获得两个序列中具有相似性的序列�
 `
 ## 下载安装
 下载地址：ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/
-## 建立数据库
-BLAST数据库分为两类，核酸数据库和氨基酸数据库，可以用`makeblastbd`创建。可以用help参数简单看下说明。
+## 构建数据库
+本地的BLAST与网页版的不同，网页版的可以直接将基因组文件(即fasta文件)传入就能进行BLAST了，但是本地版的BLAST需要先制作目标数据库，也就是基因组文件是需要先被制成一个个的数据库后才能开始BLAST。
+
+nr指的是protein sequence，而nt指的是nucleotide。所以nr/nt数据库指的是两个数据库，前者是蛋白质数据库，后者是核酸序列数据库。
+计算资源足够而带宽不足时，建议下载fasta序列，然后使用blast的本地命令建立index。命令如下
+```
+wget -c ftp://ftp.ncbi.nih.gov/blast/db/FASTA/nr.gz # nr数据库 
+wget -c ftp://ftp.ncbi.nih.gov/blast/db/FASTA/nt.gz # nt数据库
+
+# 解压缩
+gunzip nr.gz
+gunzip nt.gz
+
+# 构建本地blast nr/nt数据库
+mkdir nr_db; mkdir nt_db
+makeblastdb -in nr -dbtype prot -title my_nr -parse_seqids -out ./nr_db/nr -logfile make_nr.log
+makeblastdb -in nt -dbtype nucl -title my_nt -parse_seqids -out ./nt_db/nt -logfile make_nt.log
+```
+带宽足够而计算资源不足，建议下载已经建立好索引的nr/nt库，命令如下：
+```
+mkdir nr_db; cd nr_db
+wget -c ftp://ftp.ncbi.nih.gov/blast/db/nr*
+for i in *gz
+do
+tar -zxvf $i
+done
+
+mkdir ../nt_db; cd ../nt_db
+wget -c ftp://ftp.ncbi.nih.gov/blast/db/nt*
+for i in *gz
+do
+tar -zxvf $i
+done
+```
+`makeblastbd`简单参数
 ```
 $ makeblastdb -help
 USAGE
@@ -34,6 +67,46 @@ USAGE
 cd /my/NCBI
 /share/app/blast/2.11.0/bin/makeblastdb -in GCF_000001405.40_GRCh38.p14_genomic.fa -parse_seqids -blastdb_version 5 -dbtype nucl
 ```
+下图为构建好的数据库索引
 <div align=center>
 <img src="https://user-images.githubusercontent.com/71922803/190936389-70d43be0-f925-4699-92b2-62a6329051d1.png" width="450">
 </div>
+`除此之外也可以下载官网给出的`
+
+## BLAST
+
+数据库制作完成就能用来进行本地BLAST了，BLAST有很多种类型如blastp、blastn、tblastn等，根据自己需要选择。此处以tblastn为例，命令如下：
+```
+blastn -query test.fa -out test.result -db nr -outfmt 6 -evalue 1e-5 -num_threads 4
+```
+常用参数介绍：
+
+-query: 需要比对的数据的文件路径以及文件名
+-out: 输出比对结果
+-db: 后面跟着建立好的索引数据库
+-outfmt: 指定输出结果的格式，此处指定为6，即常见的m8格式
+-evalue: 设置输出结果的最小e-value值
+-num_threads: 指定比对时使用的线程数
+此外，如果我们的目的是看测序数据的污染物来源，推荐加上下面两个参数：
+
+-subject_besthit：数据库中中的所有sequence，只输出blast最优的那个结果
+-max_target_seqs：设置每条 query reads所能比对上的最多的个数，这里推荐设置为1
+
+输出结果的格式解析
+输出的比对结果，一共有12列，分别代表：
+```
+1.Query id：查询序列ID标识
+2.Subject id：比对上的目标序列ID标识
+3% identity：序列比对的一致性百分比
+4.alignment length：符合比对的比对区域的长度
+5.mismatches：比对区域的错配数
+6.gap openings：比对区域的gap数目
+7.q. start：比对区域在查询序列(Query id)上的起始位点
+8.q. end：比对区域在查询序列(Query id)上的终止位点
+9.s. start：比对区域在目标序列(Subject id)上的起始位点
+10.s. end：比对区域在目标序列(Subject id)上的终止位点
+11.e-value：比对结果的期望值
+12.bit score：比对结果的bit score值
+```
+我们一般看第1，3，11，12列。其中第一列告诉我们比对到了哪个物种，剩余三列告诉我们比对的可信程度。
+
